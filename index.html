@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en" class="">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Global Post - Your Source for Breaking News</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Custom Styles -->
+    <style>
+        :root {
+            --background-light: #f4f7f9;
+            --text-light: #1a202c;
+            --card-bg-light: #ffffff;
+            --border-light: #e2e8f0;
+
+            --background-dark: #0d1117;
+            --text-dark: #c9d1d9;
+            --card-bg-dark: #161b22;
+            --border-dark: #30363d;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-light);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .dark body {
+            background-color: var(--background-dark);
+            color: var(--text-dark);
+        }
+        .dark .bg-white { background-color: var(--card-bg-dark); }
+        .dark .bg-gray-100 { background-color: #1c2128; }
+        .dark .text-gray-800 { color: #f0f6fc; }
+        .dark .text-gray-600 { color: #8b949e; }
+        .dark .border-gray-200 { border-color: var(--border-dark); }
+        .dark .hover\:bg-gray-100:hover { background-color: #2c323a; }
+        .dark .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1); }
+        .dark .shadow-md { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15), 0 2px 4px -1px rgba(0, 0, 0, 0.1); }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--background-light); }
+        .dark ::-webkit-scrollbar-track { background: var(--background-dark); }
+        ::-webkit-scrollbar-thumb { background: #bdc3c7; border-radius: 10px; }
+        .dark ::-webkit-scrollbar-thumb { background: #34495e; }
+        ::-webkit-scrollbar-thumb:hover { background: #95a5a6; }
+        .dark ::-webkit-scrollbar-thumb:hover { background: #2c3e50; }
+
+        /* News Ticker Animation */
+        .ticker-wrap {
+            width: 100%;
+            overflow: hidden;
+            height: 2.5rem;
+            background-color: #1a202c;
+            padding-left: 100%;
+            box-sizing: content-box;
+        }
+        .dark .ticker-wrap { background-color: #010409; }
+        .ticker-move {
+            display: inline-block;
+            height: 2.5rem;
+            line-height: 2.5rem;
+            white-space: nowrap;
+            padding-right: 100%;
+            box-sizing: content-box;
+            animation: ticker 30s linear infinite;
+        }
+        @keyframes ticker {
+            0% { transform: translate3d(0, 0, 0); }
+            100% { transform: translate3d(-100%, 0, 0); }
+        }
+        
+        /* 3D Canvas */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.08;
+            transition: opacity 0.3s;
+        }
+        .dark #bg-canvas { opacity: 0.05; }
+
+        /* Scroll Animation */
+        .fade-in-section {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .fade-in-section.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Mobile Menu */
+        #mobile-menu {
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        #mobile-menu.open {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- 3D Background Canvas -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Back to Top Button -->
+    <button id="to-top-button" title="Go to top"
+        class="hidden fixed z-50 bottom-10 right-10 p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all transform hover:scale-110">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 1.41-1.41L11 15.17V5h2v10.17l4.59-4.58L19 12l-7 7z"/></svg>
+    </button>
+
+    <div class="max-w-screen-xl mx-auto bg-white dark:bg-gray-900/50 shadow-lg">
+        
+        <!-- Top Header -->
+        <div class="bg-gray-800 dark:bg-black text-white text-sm py-2 px-4 md:px-8">
+            <div class="flex justify-between items-center">
+                <div class="flex-1 overflow-hidden">
+                    <div class="ticker-wrap">
+                        <div class="ticker-move">
+                            <span class="font-semibold mr-4 text-red-400">BREAKING:</span>
+                            <span class="mr-8">Global markets react to new tech innovations.</span>
+                            <span class="font-semibold mr-4 text-blue-400">SPORTS:</span>
+                            <span class="mr-8">Team Phoenix wins the championship in a stunning finale.</span>
+                            <span class="font-semibold mr-4 text-green-400">POLITICS:</span>
+                            <span class="mr-8">Leaders gather for the annual world summit.</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="hidden md:flex items-center space-x-4 pl-4">
+                    <div id="time-display" class="font-medium"></div>
+                    <div class="h-4 w-px bg-gray-600"></div>
+                    <div class="flex items-center space-x-3">
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 1.4 2.8 3.2 3 5.2-1.4 1.2-3.1 2-4.9 2.4-1.1 3.5-4.2 6.2-7.9 6.8-2.3.4-4.6.1-6.7-1-2.3-1.2-4.2-2.9-5.5-5-1.2-2.1-1.7-4.5-1.4-6.9.3-2.4 1.3-4.6 2.8-6.5C5.5 5.3 6.4 4.4 7.5 3.8c1-.7 2.1-1.2 3.3-1.5 1.2-.3 2.5-.3 3.7.1 1.2.3 2.4.9 3.4 1.7.9.8 1.7 1.7 2.3 2.8.2.3.4.7.6.9.3.4.7.7 1.1 1.1.4.3.8.6 1.2.9.4.3.8.5 1.2.7.4.2.8.4 1.2.6.4.2.8.3 1.2.4.4.1.8.2 1.2.3.4.1.8.2 1.2.2h.1c.1 0 .2.1.3.1.1 0 .2 0 .3-.1h.1z"></path></svg></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Header -->
+        <header class="sticky top-0 z-40 bg-white/80 dark:bg-[#161b22]/80 backdrop-blur-lg border-b border-gray-200 dark:border-gray-800 transition-shadow duration-300" id="main-header">
+            <div class="container mx-auto px-4 md:px-8">
+                <div class="flex justify-between items-center py-4">
+                    <a href="#" class="flex items-center space-x-2">
+                        <svg class="h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                        <span class="text-2xl font-bold text-gray-800 dark:text-white">GlobalPost</span>
+                    </a>
+                    <nav class="hidden lg:flex items-center space-x-8">
+                        <a href="#" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium">Home</a>
+                        <a href="#" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium">World</a>
+                        <a href="#" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium">Business</a>
+                        <a href="#" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium">Tech</a>
+                        <a href="#" class="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium">Culture</a>
+                    </nav>
+                    <div class="flex items-center space-x-4">
+                        <button id="dark-mode-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                            <svg id="sun-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-700 dark:text-gray-300"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>
+                            <svg id="moon-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden text-gray-700 dark:text-gray-300"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>
+                        </button>
+                        <button id="mobile-menu-button" class="lg:hidden p-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-700 dark:text-gray-300"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Category Bar -->
+        <div class="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-[#161b22]">
+            <div class="container mx-auto px-4 md:px-8 overflow-x-auto">
+                <nav id="category-nav" class="flex space-x-8 py-3 text-sm font-medium">
+                    <a href="#" data-category="latest" class="category-link active text-blue-600 dark:text-blue-400 whitespace-nowrap pb-2 border-b-2 border-blue-600">Latest News</a>
+                    <a href="#" data-category="tech" class="category-link text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 whitespace-nowrap pb-2 border-b-2 border-transparent">Technology</a>
+                    <a href="#" data-category="finance" class="category-link text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 whitespace-nowrap pb-2 border-b-2 border-transparent">Finance</a>
+                    <a href="#" data-category="health" class="category-link text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 whitespace-nowrap pb-2 border-b-2 border-transparent">Health</a>
+                    <a href="#" data-category="science" class="category-link text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 whitespace-nowrap pb-2 border-b-2 border-transparent">Science</a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="container mx-auto px-4 md:px-8 py-8">
+            <!-- Hero Section -->
+            <section class="mb-12 fade-in-section">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="group relative rounded-xl overflow-hidden cursor-pointer">
+                        <img src="image/ai.png" alt="Featured Story" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 p-6 text-white">
+                            <span class="text-xs font-bold uppercase bg-blue-600 px-2 py-1 rounded">Technology</span>
+                            <h2 class="text-3xl font-bold mt-2">The AI Revolution: How Artificial Intelligence is Reshaping Our World</h2>
+                            <p class="text-sm opacity-80 mt-2">By Jane Doe &bull; 12 min read</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-rows-2 gap-6">
+                        <div class="group relative rounded-xl overflow-hidden cursor-pointer">
+                            <img src="image/stock.png" alt="Market Trends" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                            <div class="absolute bottom-0 left-0 p-4 text-white">
+                                <span class="text-xs font-bold uppercase bg-green-600 px-2 py-1 rounded">Business</span>
+                                <h3 class="text-xl font-bold mt-1">Navigating the Volatile Stock Market of 2024</h3>
+                            </div>
+                        </div>
+                        <div class="group relative rounded-xl overflow-hidden cursor-pointer">
+                            <img src="image/climate change.png" alt="Global Summit" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                            <div class="absolute bottom-0 left-0 p-4 text-white">
+                                <span class="text-xs font-bold uppercase bg-orange-600 px-2 py-1 rounded">World</span>
+                                <h3 class="text-xl font-bold mt-1">World Leaders Convene to Discuss Climate Change</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 space-y-12" id="news-container">
+                    <!-- News categories will be dynamically inserted here -->
+                </div>
+
+                <!-- Right Sidebar -->
+                <aside class="lg:col-span-1 space-y-8 sticky top-24 self-start">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md fade-in-section">
+                        <h3 class="font-bold text-lg mb-4">Search</h3>
+                        <div class="relative">
+                            <input type="text" placeholder="Search articles..." class="w-full py-2 pl-4 pr-10 rounded-full bg-gray-100 dark:bg-gray-700 border border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <button class="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Trending Section -->
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md fade-in-section">
+                        <h3 class="font-bold text-lg mb-4">Trending Now</h3>
+                        <ul class="space-y-4">
+                            <li class="flex items-start space-x-3 group">
+                                <span class="font-bold text-xl text-gray-300 dark:text-gray-600">1</span>
+                                <div>
+                                    <a href="#" class="font-semibold group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">The quick brown fox jumps over the lazy dog.</a>
+                                    <p class="text-sm text-gray-500 mt-1">5.2k views</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start space-x-3 group">
+                                <span class="font-bold text-xl text-gray-300 dark:text-gray-600">2</span>
+                                <div>
+                                    <a href="#" class="font-semibold group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">A journey of a thousand miles begins with a single step.</a>
+                                    <p class="text-sm text-gray-500 mt-1">4.8k views</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start space-x-3 group">
+                                <span class="font-bold text-xl text-gray-300 dark:text-gray-600">3</span>
+                                <div>
+                                    <a href="#" class="font-semibold group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Exploring the depths of the Mariana Trench.</a>
+                                    <p class="text-sm text-gray-500 mt-1">3.1k views</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-lg shadow-2xl fade-in-section">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-bold text-lg text-white">AI Assistant</h3>
+                            <div class="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                        </div>
+                        <div class="bg-black/30 h-64 rounded-md p-3 flex flex-col">
+                            <div id="chatbot-messages" class="flex-grow text-sm space-y-3 text-gray-300 overflow-y-auto pr-2">
+                                <div class="flex">
+                                    <p class="bg-white/10 p-2 rounded-lg self-start max-w-xs">Hi there! How can I help you find the latest news today?</p>
+                                </div>
+                            </div>
+                            <div class="relative mt-2 flex items-center">
+                                <input id="chatbot-input" type="text" placeholder="Ask me anything..." class="w-full text-sm py-2 pl-3 pr-10 rounded-full bg-white/10 text-white placeholder-gray-400 border-none focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <button id="chatbot-send" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-gray-900 dark:bg-black text-gray-400 pt-16 pb-8">
+            <div class="container mx-auto px-4 md:px-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12">
+                    <div class="lg:col-span-2">
+                        <a href="#" class="flex items-center space-x-2 mb-4">
+                           <svg class="h-8 w-8 text-blue-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                            <span class="text-2xl font-bold text-white">GlobalPost</span>
+                        </a>
+                        <p class="pr-8">Your unbiased window to the world. We deliver news that matters, with clarity and integrity.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-white mb-4 uppercase tracking-wider text-sm">Quick Links</h4>
+                        <ul class="space-y-2">
+                            <li><a href="#" class="hover:text-white transition-colors">About Us</a></li>
+                            <li><a href="#" class="hover:text-white transition-colors">Contact</a></li>
+                            <li><a href="#" class="hover:text-white transition-colors">Careers</a></li>
+                            <li><a href="#" class="hover:text-white transition-colors">Privacy Policy</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-white mb-4 uppercase tracking-wider text-sm">Categories</h4>
+                        <ul class="space-y-2">
+                            <li><a href="#" class="hover:text-white transition-colors">Technology</a></li>
+                            <li><a href="#" class="hover:text-white transition-colors">Business</a></li>
+                            <li><a href="#" class="hover:text-white transition-colors">World News</a></li>
+                            <li><a href="#" class="hover:text-white transition-colors">Science</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-white mb-4 uppercase tracking-wider text-sm">Stay Connected</h4>
+                        <p class="text-sm mb-4">Stay ahead with our daily briefing.</p>
+                        <form id="newsletter-form" class="flex mb-6">
+                            <input id="newsletter-email" type="email" placeholder="Your email" required class="w-full py-2 px-3 rounded-l-md bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
+                            <button type="submit" class="bg-blue-600 text-white font-semibold px-4 rounded-r-md hover:bg-blue-700 transition-colors">Go</button>
+                        </form>
+                        <div id="newsletter-feedback"></div>
+                        <div class="flex items-center space-x-4 mt-6">
+                            <a href="#" class="text-gray-400 hover:text-white transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg></a>
+                            <a href="#" class="text-gray-400 hover:text-white transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 1.4 2.8 3.2 3 5.2-1.4 1.2-3.1 2-4.9 2.4-1.1 3.5-4.2 6.2-7.9 6.8-2.3.4-4.6.1-6.7-1-2.3-1.2-4.2-2.9-5.5-5-1.2-2.1-1.7-4.5-1.4-6.9.3-2.4 1.3-4.6 2.8-6.5C5.5 5.3 6.4 4.4 7.5 3.8c1-.7 2.1-1.2 3.3-1.5 1.2-.3 2.5-.3 3.7.1 1.2.3 2.4.9 3.4 1.7.9.8 1.7 1.7 2.3 2.8.2.3.4.7.6.9.3.4.7.7 1.1 1.1.4.3.8.6 1.2.9.4.3.8.5 1.2.7.4.2.8.4 1.2.6.4.2.8.3 1.2.4.4.1.8.2 1.2.3.4.1.8.2 1.2.2h.1c.1 0 .2.1.3.1.1 0 .2 0 .3-.1h.1z"></path></svg></a>
+                            <a href="#" class="text-gray-400 hover:text-white transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-12 border-t border-gray-700 pt-6 text-center text-sm">
+                    <p>&copy; 2024 GlobalPost. All Rights Reserved. A premium template for you.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="fixed top-0 left-0 w-full h-full bg-gray-900/95 z-50 text-white p-8 lg:hidden">
+        <div class="flex justify-between items-center mb-12">
+            <span class="text-2xl font-bold">Menu</span>
+            <button id="close-mobile-menu">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+        <nav class="flex flex-col space-y-6 text-xl text-center">
+            <a href="#" class="hover:text-blue-400 transition-colors">Home</a>
+            <a href="#" class="hover:text-blue-400 transition-colors">World</a>
+            <a href="#" class="hover:text-blue-400 transition-colors">Business</a>
+            <a href="#" class="hover:text-blue-400 transition-colors">Tech</a>
+            <a href="#" class="hover:text-blue-400 transition-colors">Culture</a>
+        </nav>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            const html = document.documentElement;
+
+            // --- DARK MODE ---
+            const toggleButton = document.getElementById('dark-mode-toggle');
+            const sunIcon = document.getElementById('sun-icon');
+            const moonIcon = document.getElementById('moon-icon');
+            
+            const setDarkMode = (isDark) => {
+                html.classList.toggle('dark', isDark);
+                sunIcon.classList.toggle('hidden', isDark);
+                moonIcon.classList.toggle('hidden', !isDark);
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            };
+
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const savedTheme = localStorage.getItem('theme');
+            setDarkMode(savedTheme === 'dark' || (savedTheme === null && prefersDark));
+            
+            toggleButton.addEventListener('click', () => setDarkMode(!html.classList.contains('dark')));
+
+            // --- LIVE CLOCK ---
+            const timeDisplay = document.getElementById('time-display');
+            function updateTime() {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+                const dateString = now.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+                if(timeDisplay) timeDisplay.textContent = `${dateString}, ${timeString}`;
+            }
+            updateTime();
+            setInterval(updateTime, 60000);
+
+            // --- HEADER SHADOW ON SCROLL ---
+            const header = document.getElementById('main-header');
+            window.addEventListener('scroll', () => {
+                header.classList.toggle('shadow-md', window.scrollY > 0);
+            });
+
+            // --- DYNAMIC NEWS CONTENT ---
+            const newsData = {
+                technology: [
+                    { title: 'The Future of AI: What to Expect in the Next Decade', author: 'Jane Doe', time: '8 min read', img: '600x400/3B82F6/fff?text=AI+Future', tag: 'AI', avatar: 'https://i.pravatar.cc/40?u=a' },
+                    { title: 'New Breakthrough in Quantum Computing Announced', author: 'John Smith', time: '5 min read', img: '600x400/9333EA/fff?text=Quantum', tag: 'Quantum', avatar: 'https://i.pravatar.cc/40?u=b' },
+                    { title: 'How 5G is Changing the World Around Us', author: 'Emily White', time: '7 min read', img: '600x400/F59E0B/fff?text=5G+World', tag: 'Infrastructure', avatar: 'https://i.pravatar.cc/40?u=c' },
+                    { title: 'Top 5 Gadgets Released This Month', author: 'Chris Green', time: '10 min read', img: '600x400/10B981/fff?text=Gadgets', tag: 'Review', avatar: 'https://i.pravatar.cc/40?u=d' },
+                    { title: 'Cybersecurity Threats on the Rise: How to Protect Yourself', author: 'Alex Johnson', time: '6 min read', img: '600x400/EF4444/fff?text=Security', tag: 'Security', avatar: 'https://i.pravatar.cc/40?u=e' },
+                ],
+                finance: [
+                    { title: 'Global Stock Markets See Unprecedented Growth', author: 'Michael Brown', time: '9 min read', img: '600x400/22C55E/fff?text=Stocks', tag: 'Markets', avatar: 'https://i.pravatar.cc/40?u=f' },
+                    { title: 'The Rise of Remote Work and its Impact on the Economy', author: 'Sarah Davis', time: '11 min read', img: '600x400/6366F1/fff?text=Remote+Work', tag: 'Economy', avatar: 'https://i.pravatar.cc/40?u=g' },
+                    { title: 'Understanding Cryptocurrency: A Beginner\'s Guide', author: 'David Wilson', time: '15 min read', img: '600x400/F97316/fff?text=Crypto', tag: 'Crypto', avatar: 'https://i.pravatar.cc/40?u=h' },
+                    { title: 'Inflation Rates: Causes, Effects, and Future Outlook', author: 'Laura Taylor', time: '8 min read', img: '600x400/EC4899/fff?text=Inflation', tag: 'Finance', avatar: 'https://i.pravatar.cc/40?u=i' },
+                    { title: 'How Small Businesses Can Thrive in a Digital World', author: 'Robert Miller', time: '7 min read', img: '600x400/8B5CF6/fff?text=Small+Business', tag: 'Strategy', avatar: 'https://i.pravatar.cc/40?u=j' },
+                ]
+            };
+
+            const newsContainer = document.getElementById('news-container');
+            
+            // --- SCROLL ANIMATIONS ---
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            function renderArticles(categories) {
+                if(!newsContainer) return;
+                newsContainer.innerHTML = '';
+                
+                categories.forEach(categoryData => {
+                    const section = document.createElement('section');
+                    section.className = 'fade-in-section';
+
+                    let articlesHTML = '';
+                    categoryData.articles.forEach(article => {
+                        articlesHTML += `
+                            <article class="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 group">
+                                <a href="#" class="block">
+                                    <div class="overflow-hidden h-56">
+                                        <img src="https://placehold.co/${article.img}" alt="${article.title}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                                    </div>
+                                    <div class="p-6">
+                                        <span class="text-xs font-bold uppercase text-blue-600 dark:text-blue-400">${article.tag}</span>
+                                        <h3 class="text-xl font-bold mt-2 mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">${article.title}</h3>
+                                        <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                                            <img src="${article.avatar}" class="w-8 h-8 rounded-full mr-3" alt="${article.author}">
+                                            <span>By <span class="font-semibold">${article.author}</span> &bull; ${article.time}</span>
+                                        </div>
+                                    </div>
+                                </a>
+                            </article>
+                        `;
+                    });
+
+                    section.innerHTML = `
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-3xl font-extrabold text-gray-800 dark:text-white">${categoryData.category}</h2>
+                            <a href="#" class="text-sm font-semibold text-blue-600 hover:underline">View All</a>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            ${articlesHTML}
+                        </div>
+                    `;
+                    newsContainer.appendChild(section);
+                });
+                
+                // Re-observe new sections for fade-in animation
+                const sections = newsContainer.querySelectorAll('.fade-in-section');
+                sections.forEach(section => observer.observe(section));
+            }
+
+            renderArticles([
+                { category: 'Technology', articles: newsData.technology },
+                { category: 'Business & Finance', articles: newsData.finance }
+            ]);
+            
+            // Observe initial static sections
+            const initialSections = document.querySelectorAll('.fade-in-section');
+            initialSections.forEach(section => observer.observe(section));
+
+
+            // --- CATEGORY FILTERING ---
+            const categoryLinks = document.querySelectorAll('.category-link');
+            categoryLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    categoryLinks.forEach(l => {
+                        l.classList.remove('active', 'text-blue-600', 'dark:text-blue-400', 'border-blue-600');
+                        l.classList.add('text-gray-500', 'dark:text-gray-400', 'border-transparent');
+                    });
+                    e.target.classList.add('active', 'text-blue-600', 'dark:text-blue-400', 'border-blue-600');
+                    e.target.classList.remove('text-gray-500', 'dark:text-gray-400', 'border-transparent');
+                    
+                    // This is a simulation. In a real app, you'd fetch and render new data.
+                    const category = e.target.dataset.category;
+                    if(category === 'latest') {
+                         renderArticles([
+                            { category: 'Technology', articles: newsData.technology },
+                            { category: 'Business & Finance', articles: newsData.finance }
+                        ]);
+                    } else if (category === 'tech') {
+                        renderArticles([{ category: 'Technology', articles: newsData.technology }]);
+                    } else if (category === 'finance') {
+                        renderArticles([{ category: 'Business & Finance', articles: newsData.finance }]);
+                    } else {
+                        newsContainer.innerHTML = `<p class="text-center text-gray-500">No articles found in this category.</p>`;
+                    }
+                });
+            });
+
+            // --- MOBILE MENU ---
+            const mobileMenu = document.getElementById('mobile-menu');
+            const openMenuBtn = document.getElementById('mobile-menu-button');
+            const closeMenuBtn = document.getElementById('close-mobile-menu');
+            openMenuBtn.addEventListener('click', () => mobileMenu.classList.add('open'));
+            closeMenuBtn.addEventListener('click', () => mobileMenu.classList.remove('open'));
+
+            // --- BACK TO TOP BUTTON ---
+            const toTopButton = document.getElementById('to-top-button');
+            window.addEventListener('scroll', () => {
+                if (window.pageYOffset > 300) {
+                    toTopButton.classList.remove('hidden');
+                } else {
+                    toTopButton.classList.add('hidden');
+                }
+            });
+            toTopButton.addEventListener('click', () => window.scrollTo(0, 0));
+            
+            // --- NEWSLETTER FORM ---
+            const newsletterForm = document.getElementById('newsletter-form');
+            const newsletterEmail = document.getElementById('newsletter-email');
+            const newsletterFeedback = document.getElementById('newsletter-feedback');
+            newsletterForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                if (newsletterEmail.value && newsletterEmail.checkValidity()) {
+                    newsletterFeedback.innerHTML = `<p class="text-green-400 text-sm mt-2">Thank you for subscribing!</p>`;
+                    newsletterEmail.value = '';
+                } else {
+                    newsletterFeedback.innerHTML = `<p class="text-red-400 text-sm mt-2">Please enter a valid email address.</p>`;
+                }
+                setTimeout(() => newsletterFeedback.innerHTML = '', 3000);
+            });
+
+            // --- INTERACTIVE CHATBOT ---
+            const chatMessages = document.getElementById('chatbot-messages');
+            const chatInput = document.getElementById('chatbot-input');
+            const chatSendBtn = document.getElementById('chatbot-send');
+
+            const handleChat = () => {
+                const userInput = chatInput.value.trim();
+                if (!userInput) return;
+
+                // Display user message
+                chatMessages.innerHTML += `<div class="flex justify-end"><p class="bg-blue-600 text-white p-2 rounded-lg self-end max-w-xs">${userInput}</p></div>`;
+                chatInput.value = '';
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                // Simulated AI response
+                setTimeout(() => {
+                    chatMessages.innerHTML += `<div class="flex"><p class="bg-white/10 p-2 rounded-lg self-start max-w-xs">I'm a demo bot. I can't process requests, but thanks for trying!</p></div>`;
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }, 1000);
+            };
+
+            chatSendBtn.addEventListener('click', handleChat);
+            chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handleChat();
+            });
+
+            // --- THREE.JS 3D BACKGROUND ---
+            let scene, camera, renderer, globe;
+            function init3D() {
+                scene = new THREE.Scene();
+                camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('bg-canvas'), alpha: true });
+                renderer.setSize(window.innerWidth, window.innerHeight);
+
+                const geometry = new THREE.IcosahedronGeometry(2, 3);
+                const material = new THREE.MeshBasicMaterial({
+                    color: 0x888888,
+                    wireframe: true,
+                    transparent: true,
+                    opacity: 0.3
+                });
+                globe = new THREE.Mesh(geometry, material);
+                scene.add(globe);
+                camera.position.z = 4;
+            }
+
+            let mouseX = 0, mouseY = 0;
+            document.addEventListener('mousemove', (event) => {
+                mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+                mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+            });
+
+            function animate3D() {
+                requestAnimationFrame(animate3D);
+                globe.rotation.y += 0.0005;
+                globe.rotation.x += mouseY * 0.0001;
+                globe.rotation.y += mouseX * 0.0001;
+                renderer.render(scene, camera);
+            }
+
+            function onWindowResize() {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+            window.addEventListener('resize', onWindowResize, false);
+            
+            init3D();
+            animate3D();
+        });
+    </script>
+</body>
+</html>
